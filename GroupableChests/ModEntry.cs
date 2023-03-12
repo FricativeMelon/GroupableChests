@@ -53,8 +53,6 @@ namespace GroupableChests
 
         private void behaviorOnItemSelectFromChest(Item item, Farmer who)
         {
-            Monitor.Log("BOISFC", LogLevel.Debug);
-
             if (who.couldInventoryAcceptThisItem(item))
             {
                 chest.GetItemsForPlayer(Game1.player.UniqueMultiplayerID).Remove(item);
@@ -65,7 +63,6 @@ namespace GroupableChests
 
         private void moveItemInChest(int slotTo)
         {
-            Monitor.Log("MIIC", LogLevel.Debug);
             NetObjectList<Item> item_list = chest.items;
             if (chest.SpecialChestType == SpecialChestTypes.MiniShippingBin || chest.SpecialChestType == SpecialChestTypes.JunimoChest)
             {
@@ -90,20 +87,22 @@ namespace GroupableChests
             }
             else if (item_list[slotTo] != null && item_list[slotTo].canStackWith(item))
             {
-                item_list[slot] = null;
-                slot = slotTo;
                 item.Stack = item_list[slotTo].addToStack(item);
-                if (item.Stack <= 0)
+                if (item.Stack > 0)
                 {
-                    return;
+                    item_list[slot] = item;
                 }
+                else
+                {
+                    item_list[slot] = null;
+                }
+                slot = slotTo;
             }
             return;
         }
 
         private Item addItemToChest(Item item)
         {
-            Monitor.Log("AITC", LogLevel.Debug);
             item.resetState();
             bool LC = Helper.Input.IsDown(SButton.LeftControl);
             NetObjectList<Item> item_list = chest.items;
@@ -181,7 +180,6 @@ namespace GroupableChests
 
         private void behaviorOnItemSelectFromInventory(Item item, Farmer who)
         {
-            Monitor.Log("ISFI", LogLevel.Debug);
             if (item.Stack == 0)
             {
                 item.Stack = 1;
@@ -228,7 +226,6 @@ namespace GroupableChests
                 }
                 if (i is Chest c)
                 {
-                    Monitor.Log("ischest", LogLevel.Debug);
                     chest = c;
                     igm.behaviorOnItemGrab = behaviorOnItemSelectFromChest;
                     Helper.Reflection.GetField<ItemGrabMenu.behaviorOnItemSelect>(igm, "behaviorFunction").SetValue(behaviorOnItemSelectFromInventory);
