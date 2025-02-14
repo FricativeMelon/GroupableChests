@@ -63,7 +63,7 @@ namespace GroupableChests
 
         private void moveItemInChest(int slotTo)
         {
-            NetObjectList<Item> item_list = chest.items;
+            StardewValley.Inventories.IInventory item_list = chest.netItems.Get();
             if (chest.SpecialChestType == SpecialChestTypes.MiniShippingBin || chest.SpecialChestType == SpecialChestTypes.JunimoChest)
             {
                 item_list = chest.GetItemsForPlayer(Game1.player.UniqueMultiplayerID);
@@ -105,7 +105,7 @@ namespace GroupableChests
         {
             item.resetState();
             bool LC = Helper.Input.IsDown(SButton.LeftControl);
-            NetObjectList<Item> item_list = chest.items;
+            StardewValley.Inventories.IInventory item_list = chest.netItems.Get();
             if (chest.SpecialChestType == SpecialChestTypes.MiniShippingBin || chest.SpecialChestType == SpecialChestTypes.JunimoChest)
             {
                 item_list = chest.GetItemsForPlayer(Game1.player.UniqueMultiplayerID);
@@ -128,7 +128,7 @@ namespace GroupableChests
                         {
                             simSlotLeft = i - 1;
                         }
-                        if (item_list[i].canStackWith(item))
+                        if (!LC && item_list[i].canStackWith(item))
                         {
                             slot = i;
                             item.Stack = item_list[i].addToStack(item);
@@ -241,7 +241,7 @@ namespace GroupableChests
                 {
                     Chest fc = fh.fridge.Get();
                     fridge_items = new List<String>(fc.GetActualCapacity());
-                    foreach (Item it in fc.items)
+                    foreach (Item it in fc.netItems.Get())
                     {
                         if (it != null)
                         {
@@ -260,7 +260,8 @@ namespace GroupableChests
                 {
                     //
                     Chest fc = fh2.fridge.Get();
-                    int chest_curr_index = fc.items.Count - 1;
+                    StardewValley.Inventories.IInventory item_list = fc.netItems.Get();
+                    int chest_curr_index = item_list.Count - 1;
                     int saved_curr_index = fridge_items.Count-1;
                     while (true) // means we can add spaces still
                     {
@@ -268,7 +269,7 @@ namespace GroupableChests
                         {
                             saved_curr_index--;
                         }
-                        while (chest_curr_index >= 0 && fc.items[chest_curr_index] == null)
+                        while (chest_curr_index >= 0 && item_list[chest_curr_index] == null)
                         {
                             chest_curr_index--;
                         }
@@ -276,15 +277,15 @@ namespace GroupableChests
                         {
                             break;
                         }
-                        if (fridge_items[saved_curr_index] == fc.items[chest_curr_index].Name && saved_curr_index != chest_curr_index)
+                        if (fridge_items[saved_curr_index] == item_list[chest_curr_index].Name && saved_curr_index != chest_curr_index)
                         {
-                            Item toMove = fc.items[chest_curr_index];
-                            fc.items[chest_curr_index] = null;
-                            while (saved_curr_index >= fc.items.Count)
+                            Item toMove = item_list[chest_curr_index];
+                            item_list[chest_curr_index] = null;
+                            while (saved_curr_index >= item_list.Count)
                             {
-                                fc.items.Add(null);
+                                item_list.Add(null);
                             }
-                            fc.items[saved_curr_index] = toMove;
+                            item_list[saved_curr_index] = toMove;
                         }
                         saved_curr_index--;
                         chest_curr_index--;
